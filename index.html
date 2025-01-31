@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TXT 文本替换工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .left, .right {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+        }
+        .left input, .right textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        .table-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            color: black;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #555;
+            color: white;
+        }
+        button {
+            background: #ff4081;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff79b0;
+        }
+        .output {
+            white-space: pre-wrap;
+            background: black;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>TXT 文本替换工具</h1>
+    <div class="container">
+        <!-- 上传和替换设置 -->
+        <div class="left">
+            <input type="file" id="fileInput" accept=".txt">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>查找</th>
+                            <th>替换为</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="replaceTable">
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="addRow()">添加替换项</button>
+            <button onclick="replaceText()">执行替换</button>
+        </div>
+
+        <!-- 输出区域 -->
+        <div class="right">
+            <textarea id="outputText" rows="10" readonly></textarea>
+            <button onclick="copyText()">复制</button>
+            <button onclick="downloadFile()">下载 TXT</button>
+        </div>
+    </div>
+
+    <script>
+        let originalText = "";
+
+        // 读取上传的文件
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalText = e.target.result;
+                document.getElementById("outputText").value = originalText;
+            };
+            reader.readAsText(file);
+        });
+
+        // 添加替换项
+        function addRow() {
+            const table = document.getElementById("replaceTable");
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="查找文本"></td>
+                <td><input type="text" placeholder="替换为"></td>
+                <td><button onclick="deleteRow(this)">删除</button></td>
+            `;
+        }
+
+        // 删除替换项
+        function deleteRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        // 执行文本替换
+        function replaceText() {
+            let modifiedText = originalText;
+            const rows = document.querySelectorAll("#replaceTable tr");
+            
+            rows.forEach(row => {
+                const findText = row.cells[0].querySelector("input").value;
+                const replaceText = row.cells[1].querySelector("input").value;
+                if (findText) {
+                    const regex = new RegExp(findText, "g");  // 全局替换
+                    modifiedText = modifiedText.replace(regex, replaceText);
+                }
+            });
+
+            document.getElementById("outputText").value = modifiedText;
+        }
+
+        // 复制文本
+        function copyText() {
+            const outputText = document.getElementById("outputText");
+            outputText.select();
+            document.execCommand("copy");
+            alert("已复制到剪贴板！");
+        }
+
+        // 下载替换后的文件
+        function downloadFile() {
+            const text = document.getElementById("outputText").value;
+            const blob = new Blob([text], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "converted.txt";
+            link.click();
+        }
+    </script>
+
+</body>
+</html>
