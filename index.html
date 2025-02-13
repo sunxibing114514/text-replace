@@ -11,25 +11,35 @@
             color: white;
             text-align: center;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
+
         h1 {
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
+
         .container {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 20px;
             flex-wrap: wrap;
-            margin-top: 20px;
+            width: 80%;
         }
-        .left, .right {
+
+        .panel {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            width: 400px;
         }
-        .left input, .right textarea {
+
+        input, textarea {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -39,27 +49,29 @@
             color: white;
             font-size: 16px;
         }
-        .left input::placeholder, .right textarea::placeholder {
+
+        input::placeholder, textarea::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
-        .table-container {
-            max-height: 200px;
-            overflow-y: auto;
-        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
             color: black;
         }
+
         th, td {
             padding: 8px;
             border: 1px solid #ddd;
+            text-align: center;
         }
+
         th {
             background: #555;
             color: white;
         }
+
         button {
             background: #ff4081;
             color: white;
@@ -69,10 +81,13 @@
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
+            margin-top: 10px;
         }
+
         button:hover {
             background: #ff79b0;
         }
+
         /* 透明的 MOD 按钮 */
         #modButton {
             position: fixed;
@@ -87,11 +102,14 @@
             font-size: 16px;
             transition: 0.3s;
         }
+
         #modButton:hover {
             background: white;
             color: black;
             transform: scale(1.05);
         }
+
+        /* MOD 界面居中 */
         #modOverlay {
             position: fixed;
             top: 0;
@@ -104,34 +122,15 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* MOD 容器 */
         #modContainer {
             background: rgba(0, 0, 0, 0.8);
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
             text-align: center;
-            max-width: 450px;
-        }
-        #modContainer h2 {
-            margin-bottom: 15px;
-        }
-        #modContainer input, #modContainer textarea {
-            width: 100%;
-            margin: 10px 0;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 16px;
-        }
-        #modContainer button {
-            background: #2196F3;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        #modContainer button:hover {
-            background: #0b7dda;
+            width: 450px;
         }
     </style>
 </head>
@@ -141,26 +140,24 @@
     <button id="modButton" onclick="openMod()">ADOFAI2.4.0</button>
 
     <div class="container">
-        <div class="left">
+        <div class="panel">
             <input type="file" id="fileInput" accept=".txt">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>查找</th>
-                            <th>替换为</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="replaceTable">
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>查找</th>
+                        <th>替换为</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="replaceTable">
+                </tbody>
+            </table>
             <button onclick="addRow()">添加替换项</button>
             <button onclick="replaceText()">执行替换</button>
         </div>
 
-        <div class="right">
+        <div class="panel">
             <textarea id="outputText" rows="10" readonly></textarea>
             <button onclick="downloadFile()">下载 TXT</button>
         </div>
