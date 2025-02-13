@@ -67,22 +67,62 @@
         button:hover {
             background: #ff79b0;
         }
-        .output {
-            white-space: pre-wrap;
-            background: black;
-            padding: 10px;
+        /* MOD 按钮 */
+        #modButton {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            padding: 10px 15px;
+            background: #4CAF50;
+            border: none;
             border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
+            cursor: pointer;
+        }
+        #modButton:hover {
+            background: #45a049;
+        }
+        /* MOD 界面 */
+        #modOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #modContainer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+        #modContainer input, #modContainer textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        #modContainer button {
+            background: #2196F3;
+        }
+        #modContainer button:hover {
+            background: #0b7dda;
         }
     </style>
 </head>
 <body>
 
     <h1>TXT 文本替换工具</h1>
+    <button id="modButton" onclick="openMod()">ADOFAI2.4.0</button>
+
     <div class="container">
-        <!-- 上传和替换设置 -->
         <div class="left">
             <input type="file" id="fileInput" accept=".txt">
             <div class="table-container">
@@ -102,83 +142,59 @@
             <button onclick="replaceText()">执行替换</button>
         </div>
 
-        <!-- 输出区域 -->
         <div class="right">
             <textarea id="outputText" rows="10" readonly></textarea>
-            <button onclick="copyText()">复制</button>
             <button onclick="downloadFile()">下载 TXT</button>
         </div>
     </div>
-   
-     <footer>
-    <p>由 <a href="https://space.bilibili.com/2044562667?plat_id=1&share_from=space&share_medium=ipad&share_plat=ios&share_session_id=42B456A3-77D9-409A-A50E-CD5F6C6EFE11&share_source=COPY&share_tag=s_i&spmid=main.space.0.0&timestamp=1737525458&unique_k=dAOmj1N" target="_blank">超炳</a> 制作</p>
-    </footer>
+
+    <!-- MOD 界面 -->
+    <div id="modOverlay">
+        <div id="modContainer">
+            <h2>ADOFAI2.4.0 Mod</h2>
+            <input type="file" id="adofaiInput" accept=".adofai">
+            <button onclick="convertAdoFile()">转换</button>
+            <textarea id="modOutput" rows="10" readonly></textarea>
+            <button onclick="downloadAdoFile()">下载 ADOFAI</button>
+            <button onclick="closeMod()">关闭</button>
+        </div>
+    </div>
 
     <script>
-        let originalText = "";
+        function openMod() {
+            document.getElementById('modOverlay').style.display = 'flex';
+        }
 
-        // 读取上传的文件
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function closeMod() {
+            document.getElementById('modOverlay').style.display = 'none';
+        }
+
+        function convertAdoFile() {
+            const fileInput = document.getElementById('adofaiInput');
+            const output = document.getElementById('modOutput');
+
+            if (!fileInput.files.length) {
+                alert("请上传 .adofai 文件");
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                originalText = e.target.result;
-                document.getElementById("outputText").value = originalText;
+                let content = e.target.result;
+                content = content.replace(/\btrue\b/g, '"Enabled"')
+                                 .replace(/\bfalse\b/g, '"Disabled"')
+                                 .replace(/\bnull\b/g, '0');
+                output.value = content;
             };
-            reader.readAsText(file);
-        });
-
-        // 添加替换项
-        function addRow() {
-            const table = document.getElementById("replaceTable");
-            const row = table.insertRow();
-            row.innerHTML = `
-                <td><input type="text" placeholder="查找文本"></td>
-                <td><input type="text" placeholder="替换为"></td>
-                <td><button onclick="deleteRow(this)">删除</button></td>
-            `;
+            reader.readAsText(fileInput.files[0]);
         }
 
-        // 删除替换项
-        function deleteRow(button) {
-            const row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
-
-        // 执行文本替换
-        function replaceText() {
-            let modifiedText = originalText;
-            const rows = document.querySelectorAll("#replaceTable tr");
-            
-            rows.forEach(row => {
-                const findText = row.cells[0].querySelector("input").value;
-                const replaceText = row.cells[1].querySelector("input").value;
-                if (findText) {
-                    const regex = new RegExp(findText, "g");  // 全局替换
-                    modifiedText = modifiedText.replace(regex, replaceText);
-                }
-            });
-
-            document.getElementById("outputText").value = modifiedText;
-        }
-
-        // 复制文本
-        function copyText() {
-            const outputText = document.getElementById("outputText");
-            outputText.select();
-            document.execCommand("copy");
-            alert("已复制到剪贴板！");
-        }
-
-        // 下载替换后的文件
-        function downloadFile() {
-            const text = document.getElementById("outputText").value;
+        function downloadAdoFile() {
+            const text = document.getElementById('modOutput').value;
             const blob = new Blob([text], { type: "text/plain" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "converted.txt";
+            link.download = "converted.adofai";
             link.click();
         }
     </script>
